@@ -1,0 +1,22 @@
+memcached: ["localhost:11211"]
+tracked:
+- name: path
+  thresholds:
+  - {action: warn, ttl: 60, value: 10}
+  - {action: tarpit, ttl: 3600, value: 10000}
+  - {action: block, ttl: 360000, value: 100000}
+- name: ip
+  thresholds:
+  - {action: 500, ttl: 60, value: 10}
+  - {action: 500, ttl: 3600, value: 10000}
+  - {action: 500, ttl: 360000, value: 100000}
+- name: user-agent
+  thresholds:
+  - {action: 404, ttl: 60, value: 10}
+  - {action: 404, ttl: 3600, value: 10000}
+  - {action: 404, ttl: 360000, value: 100000}
+- name: query
+  thresholds:
+  - {action: warn, ttl: 60, value: 10}
+  - {action: block, ttl: 3600, value: 10000}
+  - {action: block, ttl: 360000, value: 100000}
