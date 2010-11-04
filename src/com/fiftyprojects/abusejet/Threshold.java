@@ -4,11 +4,22 @@ public class Threshold {
 	private String action;
 	private int value;
 	private int ttl;
+	private String modifier;
 	
 	public Threshold(){
 		
 	}
+
+	public Threshold(String action, int value, int ttl, String modifier) {
+		super();
+		this.action = action;
+		this.value = value;
+		this.ttl = ttl;
+		this.modifier = modifier;
+	}
 	
+
+
 	public Threshold(String action, int value, int ttl) {
 		super();
 		this.action = action;
@@ -33,5 +44,13 @@ public class Threshold {
 	}
 	public void setTtl(int ttl) {
 		this.ttl = ttl;
+	}
+	
+	public String getModifier() {
+		return modifier;
+	}
+
+	public void setModifier(String modifier) {
+		this.modifier = modifier;
 	}
 }

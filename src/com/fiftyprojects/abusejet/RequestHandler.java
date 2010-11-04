@@ -1,5 +1,6 @@
 package com.fiftyprojects.abusejet;
 
+import de.xeinfach.util.IpSubnet;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,6 +36,14 @@ public class RequestHandler {
 	}
 	
 	private void storKeyVal(String key, String val){
+		
+		//Check if manual block applies
+		//key and val
+		Blocks block = AbuseServlet.conf.getBlock(key,val);
+		if(block != null){
+			actions.add(block.getAction());
+		}
+		
 		Tracked track = AbuseServlet.conf.getTracked(key);
 		if(track == null){
 			//System.out.println("No Match on Key:"+key);
@@ -44,8 +53,21 @@ public class RequestHandler {
 		for(int i=0;i<track.getThresholds().length;i++){
 			Threshold thresh = track.getThresholds()[i];
 			int ttl = thresh.getTtl();
-			if(Memcache.incr(key+"_"+val+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
-				actions.add(thresh.getAction());
+			if(thresh.getModifier() == null){
+				if(Memcache.incr(key+"_"+val+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
+					actions.add(thresh.getAction());
+				}
+			} else {
+				if(key.equals("ip") && thresh.getModifier().contains("/")){
+					IpSubnet ips = new IpSubnet(thresh.getModifier());
+					if(ips.contains(val) && Memcache.incr(key+"__"+thresh.getModifier()+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
+						actions.add(thresh.getAction());
+					}
+				} else if(val.matches(thresh.getModifier())){
+					if(Memcache.incr(key+"__"+thresh.getModifier()+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
+						actions.add(thresh.getAction());
+					}
+				}
 			}
 		}
 	}

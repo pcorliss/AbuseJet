@@ -1,22 +1,36 @@
-memcached: ["localhost:11211"]
+status: true
+tarpit: true
+
+memcached: ['localhost:11211']
+
+blocks:
+- {action: block, type: ip, value: 1.2.3.4}
+- {action: warn, type: user-agent, value: curl}
+
 tracked:
 - name: path
   thresholds:
   - {action: warn, ttl: 60, value: 10}
-  - {action: tarpit, ttl: 3600, value: 10000}
+  - {action: tarpit_40, ttl: 3600, value: 10000}
   - {action: block, ttl: 360000, value: 100000}
+  - {action: foo, ttl: 60, value: 1, modifier: /panda }
+  - {action: foo2, ttl: 60, value: 1, modifier: ^/polka.*$ }
 - name: ip
   thresholds:
-  - {action: 500, ttl: 60, value: 10}
-  - {action: 500, ttl: 3600, value: 10000}
-  - {action: 500, ttl: 360000, value: 100000}
+  - {action: status_404, ttl: 60, value: 10}
+  - {action: '500', ttl: 3600, value: 10000}
+  - {action: '500', ttl: 360000, value: 100000}
+  - {action: foo3, ttl: 60, value: 1, modifier: '1.2.3.[5-9]'}
+  - {action: foo4, ttl: 60, value: 1, modifier: '1.2.3.0/24'} 
 - name: user-agent
   thresholds:
-  - {action: 404, ttl: 60, value: 10}
-  - {action: 404, ttl: 3600, value: 10000}
-  - {action: 404, ttl: 360000, value: 100000}
+  - {action: tarpit_40, ttl: 60, value: 10}
+  - {action: '404', ttl: 3600, value: 10000}
+  - {action: '404', ttl: 360000, value: 100000}
 - name: query
   thresholds:
   - {action: warn, ttl: 60, value: 10}
   - {action: block, ttl: 3600, value: 10000}
   - {action: block, ttl: 360000, value: 100000}
+
+  
