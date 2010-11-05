@@ -1,5 +1,7 @@
 package com.fiftyprojects.abusejet;
 
+import de.xeinfach.util.IpSubnet;
+
 public class Threshold {
 	private String action;
 	private int value;
@@ -27,6 +29,31 @@ public class Threshold {
 		this.ttl = ttl;
 	}
 
+	public String applyThreshold(String key, String val){
+		if(modifier == null){
+			long memVal = Memcache.incr(key+"_"+val+"_"+ttl, ttl, 1);
+			if(memVal > value){
+				AbuseJet.storeAlert(action, key, modifier, memVal);
+				return action;
+			}
+		} else {
+			Boolean ipMatch = false;
+			if(key.equals("ip") && modifier.contains("/")){
+				IpSubnet ips = new IpSubnet(modifier);
+				ipMatch = ips.contains(val);
+			}
+			if(ipMatch == true || val.matches(modifier)){
+				long memVal = Memcache.incr("M_"+key+"_"+modifier+"_"+ttl, ttl, 1);
+				if(memVal > value){
+					AbuseJet.storeAlert(action, key, modifier, memVal);
+					return action;
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 	public String getAction() {
 		return action;
 	}

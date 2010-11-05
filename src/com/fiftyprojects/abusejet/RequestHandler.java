@@ -2,6 +2,7 @@ package com.fiftyprojects.abusejet;
 
 import de.xeinfach.util.IpSubnet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -9,18 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 
 public class RequestHandler {
 	private HttpServletRequest req;
-	private ArrayList<String> actions = new ArrayList<String>();
+	private HashSet<String> actions = new HashSet<String>();
 	
 	public RequestHandler(HttpServletRequest req) {
 		this.req = req;
 	}
 	
-	public ArrayList<String> MemcacheStore(){
-		/*for (Enumeration e = req.getHeaderNames() ; e.hasMoreElements() ;) {
-			String element = (String) e.nextElement();
-			String value = req.getHeader(element);
-			System.out.println("Header:"+element + ": " + value);
-		}*/
+	public HashSet<String> MemcacheStore(){
 		Map<String, String[]> map = req.getParameterMap();
         for (Entry<String, String[]> entry : map.entrySet()) {
             String name = entry.getKey();
@@ -38,37 +34,29 @@ public class RequestHandler {
 	private void storKeyVal(String key, String val){
 		
 		//Check if manual block applies
-		//key and val
-		Blocks block = AbuseServlet.conf.getBlock(key,val);
+		/*Blocks block = AbuseJet.conf.getBlock(key,val);
 		if(block != null){
 			actions.add(block.getAction());
+			long memVal = Memcache.incr(key+"_"+val+"_86400", 86400, 1);
+			if(AbuseJet.conf.getAlerts()){
+				String memKey = "AFB_"+block.getAction()+"_"+key+"_"+val+"_"+AbuseJet.conf.getAlertFrequency();
+				AbuseJet.alertHash.put(memKey, new ReportingEntry(AbuseJet.conf.getAlertFrequency(),memVal));
+			}
+		}*/
+		Blocks block = AbuseJet.conf.getBlock(key,val);
+		if(block != null){
+			actions.add(block.applyBlock());
 		}
 		
-		Tracked track = AbuseServlet.conf.getTracked(key);
+		Tracked track = AbuseJet.conf.getTracked(key);
 		if(track == null){
-			//System.out.println("No Match on Key:"+key);
 			return;
 		}
-		//System.out.println("Matched:"+key);
-		for(int i=0;i<track.getThresholds().length;i++){
-			Threshold thresh = track.getThresholds()[i];
-			int ttl = thresh.getTtl();
-			if(thresh.getModifier() == null){
-				if(Memcache.incr(key+"_"+val+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
-					actions.add(thresh.getAction());
-				}
-			} else {
-				if(key.equals("ip") && thresh.getModifier().contains("/")){
-					IpSubnet ips = new IpSubnet(thresh.getModifier());
-					if(ips.contains(val) && Memcache.incr(key+"__"+thresh.getModifier()+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
-						actions.add(thresh.getAction());
-					}
-				} else if(val.matches(thresh.getModifier())){
-					if(Memcache.incr(key+"__"+thresh.getModifier()+"_"+ttl, ttl, 1) > thresh.getValue() && !actions.contains(thresh.getAction())){
-						actions.add(thresh.getAction());
-					}
-				}
-			}
+		
+		
+		
+		for(Threshold thresh: track.getThresholds()){
+			actions.add(thresh.applyThreshold(key, val));
 		}
 	}
 

@@ -18,13 +18,7 @@ public class Memcache {
 	public static long incr(String key, int ttl, int value){
 		if(!initClient()){ return -1; }
 		//System.out.println("Incr:"+key+":"+ttl+":"+value);
-		long retVal = c.incr(key, value);
-		if(retVal == -1){
-			//System.out.println("NewVal"+key+":"+ttl+":"+value);
-			c.set(key, ttl, Integer.toString(value));
-			//System.out.println("MC:"+key+":"+value);
-			return value;
-		}
+		long retVal = c.incr(key, value, value, ttl);
 		System.out.println("MC:"+key+":"+retVal);
 		return retVal;
 	}
@@ -45,7 +39,7 @@ public class Memcache {
 		if(c == null){
 			try {
 				//c = new MemcachedClient(AddrUtil.getAddresses("localhost:11211"));
-				c = new MemcachedClient(AddrUtil.getAddresses(StringUtils.join(AbuseServlet.conf.getMemcached()," ")));
+				c = new MemcachedClient(AddrUtil.getAddresses(StringUtils.join(AbuseJet.conf.getMemcached()," ")));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -55,6 +49,12 @@ public class Memcache {
 		} else {
 			return true;
 		}
+	}
+
+	public static Boolean set(String key, int ttl, long memVal) {
+		if(!initClient()){ return false; }
+		c.set(key, ttl, String.valueOf(memVal));
+		return true;
 	}
 	
 	

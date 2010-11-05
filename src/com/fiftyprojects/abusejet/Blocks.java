@@ -15,7 +15,7 @@ public class Blocks {
 		this.value = value;
 		this.action = action;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
@@ -33,6 +33,15 @@ public class Blocks {
 	}
 	public void setAction(String action) {
 		this.action = action;
+	}
+
+	public String applyBlock(){
+		long memVal = Memcache.incr(type+"_"+value+"_86400", 86400, 1);
+		if(AbuseJet.conf.getAlerts()){
+			String memKey = "AFB_"+action+"_"+type+"_"+value+"_"+AbuseJet.conf.getAlertFrequency();
+			AbuseJet.alertHash.put(memKey, new ReportingEntry(AbuseJet.conf.getAlertFrequency(),memVal));
+		}
+		return action;
 	}
 
 }

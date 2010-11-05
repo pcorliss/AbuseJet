@@ -1,8 +1,11 @@
 package com.fiftyprojects.abusejet;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class Tracked {
 	private String name;
-	private Threshold[] thresholds;
+	private ArrayList<Threshold> thresholds = new ArrayList<Threshold>();
 	
 	
 	public Tracked(){
@@ -12,10 +15,8 @@ public class Tracked {
 	public Tracked(String name, Threshold[] thresholds) {
 		super();
 		this.name = name;
-		this.thresholds = thresholds;
+		this.thresholds = (ArrayList<Threshold>) Arrays.asList(thresholds);
 	}
-	
-
 	
 	public String getName() {
 		return name;
@@ -23,10 +24,10 @@ public class Tracked {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Threshold[] getThresholds() {
+	public ArrayList<Threshold> getThresholds() {
 		return thresholds;
 	}
-	public void setThresholds(Threshold[] thresholds) {
+	public void setThresholds(ArrayList<Threshold> thresholds) {
 		this.thresholds = thresholds;
 	}
 }
