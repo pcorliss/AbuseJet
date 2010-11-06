@@ -4,8 +4,8 @@ import de.xeinfach.util.IpSubnet;
 
 public class Threshold {
 	private String action;
-	private int value;
-	private int ttl;
+	private int value = 0;
+	private int ttl = 0;
 	private String modifier;
 	
 	public Threshold(){

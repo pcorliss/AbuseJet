@@ -1,25 +1,15 @@
 package com.fiftyprojects.abusejet;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 public class AbuseServlet extends HttpServlet {
-		//static Yaml yaml = initYaml();
-		
 		
 		public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			handle(req, resp);
@@ -31,7 +21,6 @@ public class AbuseServlet extends HttpServlet {
 		
 		public void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 			if(AbuseJet.conf == null){ AbuseJet.initConf(); }
-			//System.out.println("Req Path:"+req.getRequestURI());
 			resp.setContentType("text/plain");
 			if(req.getRequestURI().equals("/admin/reload_config")){
 				AbuseJet.initConf();
@@ -54,14 +43,21 @@ public class AbuseServlet extends HttpServlet {
 				resp.setStatus(HttpServletResponse.SC_OK);
 			} else if(req.getRequestURI().equals("/admin/block")){
 				String type = req.getParameter("type");
-				String value = req.getParameter("value");
+				String valueStr = req.getParameter("value");
 				String action = req.getParameter("action");
-				if(type != null && value != null && action != null){
-					ArrayList<Blocks> blocks = (ArrayList<Blocks>) AbuseJet.conf.getBlocks();
-					//blocks[blocks.length] = new Blocks(type,value,action);
-					blocks.add(new Blocks(type,value,action));
+				String modifier = req.getParameter("modifier");
+				String ttlStr = req.getParameter("ttl");
+				int ttl = ttlStr == null ? 0 : Integer.parseInt(ttlStr);
+				int value = valueStr == null ? 0 : Integer.parseInt(valueStr);
+				if(type != null && action != null){
+					Tracked tracker = AbuseJet.conf.getTracked(type);
+					if(tracker == null){
+						tracker = new Tracked(type);
+						AbuseJet.conf.getTracked().add(tracker);
+					}
+					tracker.getThresholds().add(new Threshold(action, value, ttl, modifier));
 					Yaml yaml = new Yaml();
-					resp.getWriter().println("New Block Added, please add to the config if you would like it to be persisted.");
+					resp.getWriter().println("New Block Added, please add it to the config if you would like it to be persisted.");
 					resp.getWriter().println(yaml.dump(AbuseJet.conf));
 					resp.setStatus(HttpServletResponse.SC_OK);
 				} else {
@@ -74,25 +70,20 @@ public class AbuseServlet extends HttpServlet {
 				HashSet<String> actions = rh.MemcacheStore();
 
 				resp.getWriter().println(actions.size() > 0 ? StringUtils.join(actions.toArray()," ") : "OK");
-				// if action contains status code or tarpit
 				
 				for(String action: actions){
-					//if(tarpits && action.startsWith("tarpit_")){
 					if(AbuseJet.conf.getTarpit() && action.startsWith("tarpit-")){
 						try {
 							Thread.currentThread().sleep(Integer.parseInt(action.substring(7)) * 1000);
 						} catch (NumberFormatException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} else if(AbuseJet.conf.getStatus() && action.startsWith("status-")){
 						try {
 							resp.setStatus(Integer.parseInt(action.substring(7)));
 						} catch (NumberFormatException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -103,13 +94,11 @@ public class AbuseServlet extends HttpServlet {
 		}
 	
 		private void alert_report(HttpServletResponse resp) throws IOException {
-			//System.out.println("Alert Report");
 			resp.getWriter().println("Alert Report");
 			resp.getWriter().println("Code_action_type_offender_ttl: Val\n");
-			//System.out.println("Size:"+alertHash.size());
+			long curTime = System.currentTimeMillis()/1000;
 			for (Entry<String, ReportingEntry> entry : AbuseJet.alertHash.entrySet()){
-				if(entry.getValue().getExpiration() < System.currentTimeMillis()/1000){
-					//System.out.println("Current:"+(System.currentTimeMillis()/1000)+":Expired:"+entry.getValue().getExpiration());
+				if(entry.getValue().getExpiration() < curTime){
 					AbuseJet.alertHash.remove(entry.getKey());					
 				} else {
 					resp.getWriter().println(entry.getKey()+": "+entry.getValue().getValue());

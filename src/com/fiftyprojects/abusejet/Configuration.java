@@ -6,7 +6,6 @@ import java.util.Arrays;
 public class Configuration {
 	private ArrayList<String> memcached = new ArrayList<String>();
 	private ArrayList<Tracked> tracked = new ArrayList<Tracked>();
-	private ArrayList<Blocks> blocks = new ArrayList<Blocks>();
 	private Boolean status = true;
 	private Boolean tarpit = true;
 	private Boolean alerts = true;
@@ -17,20 +16,12 @@ public class Configuration {
 		
 	}
 
-	public Configuration(String[] memcached, Tracked[] tracked, Blocks[] blocks, Boolean status, Boolean tarpit) {
+	public Configuration(String[] memcached, Tracked[] tracked, Boolean status, Boolean tarpit) {
 		super();
 		this.memcached = (ArrayList<String>) Arrays.asList(memcached);
 		this.tracked = (ArrayList<Tracked>) Arrays.asList(tracked);
-		this.blocks = (ArrayList<Blocks>) Arrays.asList(blocks);
 		this.status = status;
 		this.tarpit = tarpit;
-	}
-	
-	public Configuration(String[] memcached, Tracked[] tracked, Blocks[] blocks) {
-		super();
-		this.memcached = (ArrayList<String>) Arrays.asList(memcached);
-		this.tracked = (ArrayList<Tracked>) Arrays.asList(tracked);
-		this.blocks = (ArrayList<Blocks>) Arrays.asList(blocks);
 	}
 	
 	public Configuration(String[] memcached, Tracked[] tracked) {
@@ -47,26 +38,7 @@ public class Configuration {
 		}
 		return null;
 	}
-	
-	public Blocks getBlock(String type, String val){
-		for(Blocks b: blocks){
-			if(b.getType().equals(type) && b.getValue().equals(val)){
-				return b;
-			}
-		}
-		return null;
-	}
 
-
-	public ArrayList<Blocks> getBlocks() {
-		return blocks;
-	}
-
-	public void setBlocks(ArrayList<Blocks> blocks) {
-		this.blocks = blocks;
-	}
-	
-	
 	public Boolean getStatus() {
 		return status;
 	}

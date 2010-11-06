@@ -1,38 +1,37 @@
-status: true
-tarpit: true
-alerts: true
-alertFrequency: 300
+status: true #[true|false]
+  #Allows abusejet to return the specified status code. Otherwise it will always pass back a 200.
 
-memcached: ['localhost:11211']
+tarpit: true #[true|false]
+  #Allows abusejet to hang when a tarpit command has been specified. Otherwise it will just return tarpit actions
 
-blocks:
-- {action: block, type: ip, value: 1.2.3.4}
-- {action: warn, type: user-agent, value: curl}
+alerts: true #[true|false]
+  #Allows abusejet to keep track of actions that have taken place for reporting purposes.
+  
+alertFrequency: 300 #[1-86400]
+  #Specifies how long actions are kept track of for reporting purposes. The larger this number is the more memory abusejet will use independent from memcached.
 
+memcached: ['localhost:11211'] #['memserver1:11211' 'memserver2:11211' 'memserverN:11211']
+  #Specifies the memcached servers abusejet should use. Port 11211 is the default port.
+  
 tracked:
+- name: ip
+    #Specifies the type of variable to be kept track of. This field is used as the parameter name in GET and POST requests to AbuseJet.
+
+  thresholds:
+  - {action: warn, ttl: 60, value: 80}
+      #Individual IPs that exceed more than 80 attempts over a 1 minute period to access your service will trigger a warn action.
+  - {action: tarpit-5, ttl: 300, value: 200}
+      #Individual IPs that exceed more than 200 attempts over a 5 minute period to access your service will trigger a tarpit of 5 seconds.
+  - {action: block, ttl: 600, value: 300}
+      #Individual IPs that exceed more than 300 attempts over a 10 minute period to access your service will trigger a block action.
+  - {action: status-404, ttl: 60, value: 0, modifier: '10.5.7.2'}
+      #The IP address 10.5.7.2 will always receive a 404 status code. This value is stored for up to 60 seconds for reporting purposes.
+  - {action: status-500, ttl: 60, value: 0, modifier: '10.4.3.0/24'}
+      #The block of IPs 10.4.3.0/24 (CIDR notation) will always receive a 500 status code. This value is also stored for up to 60 seconds.
+    
 - name: path
   thresholds:
-  - {action: warn, ttl: 60, value: 10}
-  - {action: tarpit-40, ttl: 3600, value: 10000}
-  - {action: block, ttl: 360000, value: 100000}
-  - {action: foo, ttl: 60, value: 1, modifier: /panda }
-  - {action: foo2, ttl: 60, value: 1, modifier: ^/polka.*$ }
-- name: ip
-  thresholds:
-  - {action: status-404, ttl: 60, value: 10}
-  - {action: '500', ttl: 3600, value: 10000}
-  - {action: '500', ttl: 360000, value: 100000}
-  - {action: foo3, ttl: 60, value: 1, modifier: '1.2.3.[5-9]'}
-  - {action: foo4, ttl: 60, value: 1, modifier: '1.2.3.0/24'} 
-- name: user-agent
-  thresholds:
-  - {action: tarpit-40, ttl: 60, value: 10}
-  - {action: '404', ttl: 3600, value: 10000}
-  - {action: '404', ttl: 360000, value: 100000}
-- name: query
-  thresholds:
-  - {action: warn, ttl: 60, value: 10}
-  - {action: block, ttl: 3600, value: 10000}
-  - {action: block, ttl: 360000, value: 100000}
-
-  
+  - {action: block, ttl: 60, value: 0, modifier: /threads/all }
+      #Paths that match '/threads/all' exactly will be blocked.
+  - {action: block, ttl: 60, value: 0, modifier: ^/threads/.*$ }
+      #Paths that match the '^/threads/.*$' regex will also be blocked.

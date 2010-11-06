@@ -12,6 +12,11 @@ public class Tracked {
 		
 	}
 	
+	public Tracked(String name) {
+		super();
+		this.name = name;
+	}
+	
 	public Tracked(String name, Threshold[] thresholds) {
 		super();
 		this.name = name;

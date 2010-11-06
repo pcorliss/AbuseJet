@@ -8,7 +8,6 @@ import net.spy.memcached.MemcachedClient;
 
 public class Memcache {
 	private static MemcachedClient c;
-	//private static long starttime = System.currentTimeMillis() / 1000L;
 	
 	public static long get(String key){
 		if(!initClient()){ return -1; }
@@ -17,9 +16,8 @@ public class Memcache {
 	
 	public static long incr(String key, int ttl, int value){
 		if(!initClient()){ return -1; }
-		//System.out.println("Incr:"+key+":"+ttl+":"+value);
 		long retVal = c.incr(key, value, value, ttl);
-		System.out.println("MC:"+key+":"+retVal);
+		//System.out.println("MC:"+key+":"+retVal);
 		return retVal;
 	}
 	
@@ -38,14 +36,12 @@ public class Memcache {
 	private static Boolean initClient(){
 		if(c == null){
 			try {
-				//c = new MemcachedClient(AddrUtil.getAddresses("localhost:11211"));
 				c = new MemcachedClient(AddrUtil.getAddresses(StringUtils.join(AbuseJet.conf.getMemcached()," ")));
+				return true;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return false;
 			}
-			return true;
 		} else {
 			return true;
 		}
