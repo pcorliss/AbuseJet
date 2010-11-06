@@ -22,10 +22,10 @@ You can use the following command to start AbuseJet. The default port is 8888.
 Actions
 -------
 
-Actions are recomendations from the AbuseJet service. They are returned as space seprated strings in plain-text. If there are no actions to recomend the service will return 'OK'. If you have enabled it the tarpit action and status actions are handled seprately. Only tarpit and status are handled by AbuseJet, all other actions will need to be handled by your service.
+Actions are recommendations from the AbuseJet service. They are returned as space separated strings in plain-text. If there are no actions to recommend the service will return 'OK'. If you have enabled it the tarpit action and status actions are handled separately. Only tarpit and status are handled by AbuseJet, all other actions will need to be handled by your service.
 
 ####Tarpit
-Actions that match 'tarpit-X' where X is an integer greater than 0 will cause the AbuseJet thread to sleep for X seconds. If you make a call to AbuseJet syncronously with your web service you will slow down the client making the request. This can be useful to slow down automated clients. Be aware that this will keep the thread handling the request open for the specified length of time and could cause issues with your infrastructure if you aren't prepared for it. This behavior can be turned off by setting the 'tarpit' configuration variable to 'false'.
+Actions that match 'tarpit-X' where X is an integer greater than 0 will cause the AbuseJet thread to sleep for X seconds. If you make a call to AbuseJet synchronously with your web service you will slow down the client making the request. This can be useful to slow down automated clients. Be aware that this will keep the thread handling the request open for the specified length of time and could cause issues with your infrastructure if you aren't prepared for it. This behavior can be turned off by setting the 'tarpit' configuration variable to 'false'.
 
 ####Status
 Actions that match 'status-Y' where Y will cause AbuseJet to return the matching HTTP status code. For example status-404 will cause AbuseJet to return 404 error code. This behavior can be turned off by setting the 'status' configuration variable to 'false'.
@@ -48,7 +48,7 @@ Displays a report of the actions that have been triggered over a period of time 
 Clears all memcached caches and alert reporting caches. Will reset all usage data.
 
 ####/admin/dump_config
-Prints current running config with all comments ommited. This command does not overwrite the abusejet.yaml file. But you may incorporate it's output into the file manually.
+Prints current running config with all comments omitted. This command does not overwrite the abusejet.yaml file. But you may incorporate it's output into the file manually.
 
 ####/admin/block
 Runtime additions of new items to track and respond with actions. Takes the following arguments
@@ -57,7 +57,7 @@ Runtime additions of new items to track and respond with actions. Takes the foll
 * action - Action to perform on exceeding threshold (ex. block, warn, tarpit-X, status-Y)
 * ttl - Time to live or number of seconds before value resets to 0
 * value - Number that will need to be exceeded before action is returned
-* modifier - Specifies specfic value or regex that will need to be matched.
+* modifier - Specifies specific value or regex that will need to be matched.
 
 License
 -------
